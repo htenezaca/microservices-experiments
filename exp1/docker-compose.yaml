@@ -1,0 +1,42 @@
+version: '3.7'
+services:
+  api_gateway:
+    container_name: api_gateway
+    image: nginx:1.23
+    ports:
+      - 8080:80
+    networks:
+      - api
+      - external
+    volumes:
+      - ./gateway/nginx/default.conf:/etc/nginx/templates/default.conf.template
+
+  gestion_accionables:
+    container_name: gestion_accionables
+    build:
+      dockerfile: ../Dockerfile
+      context: ./services/gestion_accionables
+    ports:
+      - 8081:5000
+    volumes:
+      - ./services/gestion_accionables:/usr/src/app
+    env_file: ./.env
+    networks:
+      - api
+
+  unidad_monitoreo:
+    container_name: unidad_monitoreo
+    build:
+      dockerfile: ../Dockerfile
+      context: ./services/unidad_monitoreo
+    ports:
+      - 8082:5000
+    volumes:
+      - ./services/unidad_monitoreo:/usr/src/app
+    env_file: ./.env
+    networks:
+      - external
+
+networks:
+  api:
+  external:
