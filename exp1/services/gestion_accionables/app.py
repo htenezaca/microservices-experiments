@@ -1,15 +1,36 @@
 from flask import Flask, Response
+from datetime import datetime
 import random
+import csv  
+import os
 
 app = Flask(__name__)
 threshold = 0.5
+filename = 'stats/responses.csv'
+
+header = ['timestamp', 'id', 'result', 'threshold']
+if(not os.path.isfile(filename) or os.path.getsize(filename) == 0):
+    with open(filename, 'w', encoding='UTF8', newline='') as f:
+        writer = csv.writer(f)
+
+        # write the header
+        writer.writerow(header)
+
 
 @app.get('/<int:id>')
 def hello_world(id):
     random_number = random.random()
-    print(id)
+    response = Response("OK", status=200)
+    
     if(random_number < threshold):
-        # La clave es devolver un 500 para que nginx lo atrape
-        return Response("FAIL", status=500)
-    else:
-        return Response("OK", status=200)
+        response = Response("FAIL", status=500)
+
+    with open(filename, 'a', encoding='UTF8', newline='') as f:
+        writer = csv.writer(f)
+        
+        # getting the timestamp
+        dt = datetime.now()
+
+        writer.writerow([dt, id, response.status_code, threshold])
+
+    return response 
