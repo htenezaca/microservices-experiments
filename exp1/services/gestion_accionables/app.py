@@ -1,20 +1,15 @@
-from flask import Flask, redirect
+from flask import Flask, Response
 import random
 
 app = Flask(__name__)
 threshold = 0.5
 
-@app.get('/')
-def hello_world():
+@app.get('/<int:id>')
+def hello_world(id):
     random_number = random.random()
-    print(random_number)
+    print(id)
     if(random_number < threshold):
-        if(random_number < threshold/2):
-            #ECONNREFUSED
-            return redirect('http://127.0.0.1:8000')
-        else:
-            #Timeout
-            return redirect('http://10.0.0.0')
+        # La clave es devolver un 500 para que nginx lo atrape
+        return Response("FAIL", status=500)
     else:
-        #Ok
-        return {'message': 'Hello, World! from gestion_accionables'}
+        return Response("OK", status=200)
