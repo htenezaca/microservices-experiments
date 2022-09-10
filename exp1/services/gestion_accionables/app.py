@@ -1,36 +1,52 @@
-from flask import Flask, Response
+import flask
+from flask import Flask, Response, g
 from datetime import datetime
 import random
-import csv  
+import csv
 import os
+import logging
 
 app = Flask(__name__)
+app.logger.setLevel(logging.INFO)
 threshold = 0.5
-filename = 'stats/responses.csv'
+filename = "./responses.csv"
 
-header = ['timestamp', 'id', 'result', 'threshold']
-if(not os.path.isfile(filename) or os.path.getsize(filename) == 0):
-    with open(filename, 'w', encoding='UTF8', newline='') as f:
-        writer = csv.writer(f)
+@app.before_first_request
+def init():
+    # remove the file and create a new one
+    os.remove(filename)
+    with open(filename, 'w', encoding="UTF8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=header)
+        writer.writeheader()
 
-        # write the header
-        writer.writerow(header)
 
-
-@app.get('/<int:id>')
-def hello_world(id):
+header = ["id", "start", "end", "delta", "status"]
+@app.get("/alert/<id>")
+def process(id):
+    # Global storage persist over threads
+    start = datetime.now()
     random_number = random.random()
     response = Response("OK", status=200)
-    
-    if(random_number < threshold):
+    status = True
+
+    if random_number < threshold:
         response = Response("FAIL", status=500)
+        status = False
 
-    with open(filename, 'a', encoding='UTF8', newline='') as f:
-        writer = csv.writer(f)
-        
-        # getting the timestamp
-        dt = datetime.now()
+    end = datetime.now()
 
-        writer.writerow([dt, id, response.status_code, threshold])
+    req_result = {
+            "id": id,
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+            "delta": (end - start).microseconds,
+            "status": status,
+        }
 
-    return response 
+    save_result(req_result)
+    return response
+
+def save_result(result):
+    with open(filename, 'a', encoding="UTF8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=header)
+        writer.writerow(result)
