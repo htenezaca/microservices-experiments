@@ -1,4 +1,5 @@
-from flask import Flask, Response
+from flask import Flask
+from flask.wrappers import Response
 from datetime import datetime
 import requests
 import os
