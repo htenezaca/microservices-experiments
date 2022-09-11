@@ -12,17 +12,20 @@ services:
       - ./gateway/nginx/default.conf:/etc/nginx/templates/default.conf.template
 
   gestion_accionables:
-    container_name: gestion_accionables
+    # container_name: gestion_accionables
     build:
       dockerfile: ../Dockerfile
       context: ./services/gestion_accionables
-    ports:
-      - 8081:5000
+    expose:
+      - 8081
     volumes:
       - ./services/gestion_accionables:/usr/src/app
     env_file: ./.env
     networks:
       - api
+    deploy:
+      mode: replicated
+      replicas: 3
 
   unidad_monitoreo:
     container_name: unidad_monitoreo

@@ -50,5 +50,27 @@ Se utiliza docker para orquestar el levantamiento de los tres componentes.
 
 Requerimientos: docker
 
-1. `docker compose up --build`
-2. Hacer http request de prueba: `curl http://127.0.0.1:8080/comandos/gestion_accionables/`
+Para correr el experimento solo es necesario dos pasos.
+
+1. En un terminal levantar el experimento: `docker compose up --build`
+2. En otro terminal comenzar la prueba: `curl http://localhost:8082/start `
+
+Luego se puede ver en el terminal 1 que se están enviando requests de pruebas desde la unidad de monitoreo, pasando por el api gateway, y luego llegando a gestion de accionables. Una vez se hallan enviado los request de prueba cien (100) por defecto, se puede ver en los logs el siguiente mensaje:
+
+```
+unidad_monitoreo            | [2022-09-11 13:34:11,025] INFO in app: Stress test finished
+```
+
+Y ahora se pueden ver los resultados de envíos en [`./services/unidad_monitoreo/input.csv`](./services/unidad_monitoreo/input.csv) y como fueron procesados en
+[`./services/gestion_accionables/responses.csv`](./services/gestion_accionables/responses.csv)
+
+Estructura de resultados:
+
+CSV con los siguientes datos:
+
+* id: identificador único del request
+* start: fecha de inicio de procesamiento
+* end: fecha de final de procesamiento
+* delta: milisegundos de procesamiento
+* status: si se proceso exitosamente o no (`response  == HTTP 200`)
+

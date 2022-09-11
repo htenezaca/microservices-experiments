@@ -1,5 +1,5 @@
-import flask
-from flask import Flask, Response, g
+from flask import Flask
+from flask.wrappers import Response
 from datetime import datetime
 import random
 import csv
@@ -8,7 +8,7 @@ import logging
 
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
-threshold = 0.5
+threshold = 0.25
 filename = "./responses.csv"
 
 @app.before_first_request
