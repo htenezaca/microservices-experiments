@@ -74,3 +74,6 @@ CSV con los siguientes datos:
 * delta: milisegundos de procesamiento
 * status: si se proceso exitosamente o no (`response  == HTTP 200`)
 
+## [Análisis](./analisis/analisis.ipynb)
+
+Se puede ver el procesamiento [en el siguiente cuaderno](./analisis/analisis.ipynb)
