@@ -76,4 +76,6 @@ CSV con los siguientes datos:
 
 ## [Análisis](./analisis/analisis.ipynb)
 
-Se puede ver el procesamiento [en el siguiente cuaderno](./analisis/analisis.ipynb)
+Se puede ver el procesamiento [en el siguiente cuaderno de jupyter](./analisis/analisis.ipynb)
+
+Se puede ver el [cuaderno solicitado de la semana 5 en el siguiente link](https://docs.google.com/presentation/d/1JQSsKAOdOFv_vHQxN4wWbGKNu0I_3v22/export?format=pdf)
