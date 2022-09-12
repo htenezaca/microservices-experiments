@@ -15,3 +15,4 @@ Somos el equipo 16
 [@htenezaca]: https://github.com/htenezaca
 [@jlopezgr]: https://github.com/jlopezgr
 
+## [Experimento 1](./exp1/README.md)
