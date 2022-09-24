@@ -16,3 +16,9 @@ Somos el equipo 16
 [@jlopezgr]: https://github.com/jlopezgr
 
 ## [Experimento 1](./exp1/README.md)
+
+Realizado en la semana 5.
+
+## [Experimento 2](./exp2/README.md)
+
+Realizado en la semana 8.

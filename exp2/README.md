@@ -46,7 +46,7 @@ flowchart LR
 
 ## Descripción Tecnológica
 
-Se utiliza docker para orquestar el levantamiento de los tres componentes.
+Se utiliza docker para orquestar el levantamiento de los cuatro componentes.
 
 1. Cliente Web: quien intenta autenticarse
 2. API Gateway: nginx configurado para apuntar a los servicios internos.
