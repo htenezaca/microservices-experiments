@@ -1,0 +1,60 @@
+version: '3.7'
+services:
+  api_gateway:
+    container_name: api_gateway
+    image: nginx:1.23
+    ports:
+      - 8080:80
+    networks:
+      - api
+      - external
+    volumes:
+      - ./gateway/nginx/default.conf:/etc/nginx/templates/default.conf.template
+
+  gestion_usuarios:
+    container_name: gestion_usuarios
+    build:
+      dockerfile: ../Dockerfile
+      context: ./services/gestion_usuarios
+    ports:
+      - 8083:5000
+    volumes:
+      - ./services/gestion_usuarios:/usr/src/app
+    env_file: ./.env
+    networks:
+      - api
+
+  notificador:
+    container_name: notificador
+    build:
+      dockerfile: ../Dockerfile
+      context: ./services/notificador
+    ports:
+      - 8082:5000
+    volumes:
+      - ./services/notificador:/usr/src/app
+    env_file: ./.env
+    networks:
+      # Puede comunicarse internamente en la red api,
+      # y también con el exterior
+      - api
+      - external
+
+  cliente_web:
+    container_name: cliente_web
+    build:
+      dockerfile: ../Dockerfile
+      context: ./services/cliente_web
+    ports:
+      - 8081:5000
+    volumes:
+      - ./services/cliente_web:/usr/src/app
+    env_file: ./.env
+    networks:
+      # Solo puede comunicarse en la red exterior,
+      # es decir el API gateway y el notificador
+      - external
+
+networks:
+  api:
+  external:
