@@ -56,5 +56,5 @@ class Auth2(Resource):
             return {"error": "Bad token_2fa"}, 401
 
 
-api.add_resource(Exp2, "/exp2")
+api.add_resource(Exp2, "/start")
 api.add_resource(Auth2, "/client_2fa")
