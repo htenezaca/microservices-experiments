@@ -25,6 +25,7 @@ class Notification(Resource):
         return {"message": "succesfull"}, 200
 
     def send_notification(self, token_2fa):
+        # TODO: Dont use api_gateway to notifications from this microservice
         res = requests.post(
             f"http://cliente_web:5000/client_2fa", json={"token_2fa": token_2fa})
         if res.status_code == 200:
