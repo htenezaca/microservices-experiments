@@ -1,4 +1,5 @@
-from flask import Flask, request
+from email import header
+from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
 from flask_jwt_extended import create_access_token, jwt_required
 from flask_jwt_extended import JWTManager
@@ -25,7 +26,17 @@ def index():
     return {"message": "Hello World, I authenticate the users"}, 200
 
 
+class TwoFactor():
+
+    two_factor = '123456'
+
+    def get_value(self):
+        return self.two_factor
+
+
 class Auth(Resource):
+    token_2fa = TwoFactor()
+
     def post(self):
         app.logger.info("Authenticating user")
         username = request.json.get("username", None)
@@ -33,69 +44,43 @@ class Auth(Resource):
         if username not in users or password != users[username]["password"]:
             return {"error": "Bad username or password"}, 401
         access_token = create_access_token(identity=username)
-        response = self.notificar(access_token)
+        response = self.send_token_2fa(
+            access_token, self.token_2fa.get_value())
         # No send access_token, just for example
-        return {"message": "succesfull"}, 200
         # return {"access_token": access_token}, 200
+        return {"message": "succesfull"}, 200
 
-    def notificar(self, token):
+    def send_token_2fa(self, token, token_2fa):
         # TODO: Send the request for double authentication Chamge this!
-        # Get the response from the notificador service
-        # return requests.post("http://notificador:5000/comandos/notificador", headers={"Authorization": f"Bearer {token}"})
-        return requests.get(f"http://api_gateway/comandos/notificador", headers={"Authorization": f"Bearer {token}"})
+        app.logger.info("Sending token_2fa to notificador")
+        res = requests.post(
+            f"http://notificador:5000/2fa", json={"token_2fa": token_2fa})
+        if res.status_code == 200:
+            app.logger.info("Token_2fa sent")
+            return {"message": "succesfull"}, 200
+        else:
+            app.logger.error("Token_2fa error")
+            return {"error": "Token_2fa not sent"}, 401
+
+    def get_token_2fa(self):
+        return self.token_2fa.get_value()
 
 
-class TwoFactor(Resource):
+class ValidateAuth2(Resource):
 
-    two_factor = '123456'
+    auth = Auth()
 
-    @jwt_required()
-    def get(self):
-        return {"token": self.two_factor}, 200
-
-    def get_value(self):
-        return self.two_factor
-
-
-class Auth2(Resource):
-
-    two_factor_generated = TwoFactor()
-
-    @jwt_required()
-    def get(self):
-        two_factor_input = request.args.get('token')
-        if two_factor_input != self.two_factor_generated.get_value():
+    def post(self):
+        token_2fa = request.json.get('token_2fa')
+        if token_2fa != self.auth.get_token_2fa():
+            app.logger.error("Token_2fa does not match")
             return {"error": "Two_token doesn't match"}, 401
-        self.notifyToClient(self.get_token_header())
+        app.logger.info("Token_2fa validated")
         return {"message": self.get_token_header()}, 200
 
     def get_token_header(self):
         return request.headers.get('Authorization')
 
-    def notifyToClient(self, token):
-        # TODO: Send the request for double authentication Chamge this!
-        return requests.get(f"http://api_gateway/comandos/client_web", headers={"Authorization": f"{token}"})
-
-
-class NotifyToClient(Resource):
-
-    @jwt_required()
-    def post(self):
-        app.logger.info("Sending message to user")
-        token = request.headers.get("Authorization", None)
-        if token is None:
-            return {"error": "Missing token"}, 401
-        if self.notify(token).ok:
-            return {"message": "Message sent"}, 200
-        return {"error": "Error sending message"}, 500
-
-    def notify(self, token):
-        # TODO: Send the notification to the user Change this!
-        # return requests.post("http://notificador:5000/comandos/cliente_web")
-        return requests.get(f"http://api_gateway/comandos/cliente_web")
-
 
 api.add_resource(Auth, '/auth')
-api.add_resource(NotifyToClient, '/notificar')
-api.add_resource(Auth2, '/auth2')
-api.add_resource(TwoFactor, '/two_factor')
+api.add_resource(ValidateAuth2, '/validate_auth2')
