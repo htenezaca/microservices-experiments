@@ -1,8 +1,7 @@
 from email import header
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flask_restful import Api, Resource
-from flask_jwt_extended import create_access_token, jwt_required
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, JWTManager
 import requests
 import logging
 import random
@@ -86,10 +85,22 @@ class ValidateAuth2(Resource):
             return {"error": "Two_token doesn't match"}, 401
         write_csv({"user":username,"result":True})
         app.logger.info("Token_2fa validated")
-        return {"message": "authenticated"}, 200
+        return {
+            "message": "authenticated",
+            "jwt": create_access_token(identity={"username": username}),
+        }, 200
+
+class Me(Resource):
+
+    @jwt_required()
+    def get(self):
+        identity = get_jwt_identity()
+        return {"message": f"You're {identity.get('username')}"}, 200
+
 
 api.add_resource(Auth, '/auth')
-api.add_resource(ValidateAuth2, '/validate_auth2')
+api.add_resource(ValidateAuth2, '/auth/validate')
+api.add_resource(Me, '/me')
 
 
 def write_csv(data):
